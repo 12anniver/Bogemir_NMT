@@ -55,7 +55,7 @@ document.getElementById("send").addEventListener("click", async () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer 4Lp14fe-WQqICDmPNKU6V_bzeXQfldHOMjf9rKwfTZ0"
+        "Authorization": "Bearer 3SmrMlTFY3VwGpj9V0AXKjUseAja1TE67rDhPq_pyNM"
       },
       body: JSON.stringify({
         model: "BOGEMIR_NMT", // Replace with actual model
@@ -98,3 +98,4 @@ document.getElementById("send").addEventListener("click", async () => {
     chatEl.appendChild(errorMsg);
   }
 });
+
