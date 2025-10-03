@@ -29,3 +29,4 @@ themeCheckbox.addEventListener("change", () => {
     iconSpan.textContent = "☀️";
   }
 });
+

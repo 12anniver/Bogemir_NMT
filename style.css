@@ -3,6 +3,97 @@
   box-sizing: border-box;
 }
 
+  #container-history {
+  display: flex;
+  width:100% ;
+  height: 100vh;
+  overflow: hidden;
+  }
+  #left-panel {
+  width: 260px;
+  background-color: #d1d1d1;
+  border-right: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  box-sizing: border-box;
+  transition: width 0.3s ease;
+}
+body.dark #left-panel {
+  background-color: #212121;
+}
+#left-panel.collapsed {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+}
+#sidebar-settings {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+#settings-button,
+#toggle-sidebar {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+   #new-chat-btn {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px;
+    cursor: pointer;
+  }
+
+#chat-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.chat-item {
+  position: relative;
+  padding: 8px 32px 8px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+  user-select: none;
+}
+
+.chat-item:hover {
+  background-color: #e0e0e0;
+}
+
+/* Rename input */
+.chat-item input.rename-input {
+  width: 100%;
+  border: none;
+  font-size: 14px;
+  background-color: #fff;
+  padding: 4px;
+}
+
+/* Delete button hidden by default */
+.chat-item .delete-btn {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: red;
+  font-size: 16px;
+  cursor: pointer;
+  display: none;
+}
+#new-chat-btn{
+  margin-top: 45px;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -35,7 +126,7 @@ body.dark {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   z-index: 9999;
-  background-color: #007bff;
+  background-color: #536590;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -74,10 +165,10 @@ body.dark #splash {
 }
 
 #start-button {
-  padding: 12px 24px;
-  font-size: 1rem;
-  background-color: white;
-  color: #007bff;
+  padding: 12px 50px;
+  font-size: 25px;
+  background: white;
+  color: #062648;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -86,7 +177,7 @@ body.dark #splash {
 }
 
 #start-button:hover {
-  background-color: #6f6f6f;
+  background: #bbbbbb !important;
 }
 
 body.dark #start-button {
@@ -179,7 +270,7 @@ body.dark #container {
 }
 
 .user {
-  background-color: #007bff;
+  background-color: #104680;
   color: white;
   margin-left: auto;
   text-align: right;
@@ -251,12 +342,38 @@ body.dark #question:focus {
   box-shadow: 0 0 0 2px #007bff;
   border-color: #007bff;
 }
-
+#chat {
+  scroll-behavior: smooth;
+}
 #start-button, #send {
   user-select: none;
 }
 #chat::-webkit-scrollbar {
   width: 8px;
+}
+/* ===== Settings Button - Top Left ===== */
+.settings-wrapper {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 10000;
+}
+
+#settings-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: inherit;
+  transition: transform 0.2s ease;
+}
+
+#settings-button:hover {
+  transform: rotate(20deg);
+}
+
+body.dark #settings-button {
+  color: white;
 }
 
 #chat::-webkit-scrollbar-thumb {
@@ -270,9 +387,10 @@ body.dark #chat::-webkit-scrollbar-thumb {
 
 #send {
   padding: clamp(8px, 1vw, 12px) clamp(12px, 2vw, 20px);
+  margin-left: 10px;
   font-size: clamp(1rem, 2vw, 1.1rem);
   border-radius: 8px;
-  background-color: #007bff;
+  background-color: #11365e;
   color: white;
   border: none;
   cursor: pointer;
@@ -280,7 +398,7 @@ body.dark #chat::-webkit-scrollbar-thumb {
 }
 
 #send:hover {
-  background-color: #0056b3;
+  background-color: #041c35;
 }
 
 body.dark #send {
@@ -358,6 +476,118 @@ input:checked + .slider::before {
 input:checked + .slider .icon {
   transform: translateX(26px);
 }
+.settings-wrapper {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 10000;
+  }
+  #settings-button {
+    font-size: 24px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: inherit;
+    user-select: none;
+  }
+  #settings-button:hover {
+    transform: rotate(15deg);
+    transition: transform 0.3s ease;
+  }
+
+  .modal {
+  position: absolute;
+  overflow: hidden;
+  top: 60px;
+  left: 15px;
+  width: 250px;
+  padding: 20px;
+  background: rgb(255, 255, 255);
+  color: black;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 10001;
+}
+
+.modal {
+  /* already existing styles */
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease,
+    box-shadow 0.3s ease;
+}
+
+.modal:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Base modal animation */
+.modal {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none; /* prevent click when hidden */
+}
+
+/* When visible (not hidden) */
+.modal.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+body.dark .modal::before {
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(0, 123, 255, 0.2), transparent 60%);
+}
+
+body.dark .modal:hover {
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.1);
+}
+body.dark .modal {
+  background: #1e1e1e;
+  color: white;
+  border-color: #555;
+}
+
+.hidden {
+  display: none !important;
+}
+
+
+  .modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+  }
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  input[type="range"] {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  #volume-value {
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+  #close-settings {
+    background-color: #132940;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  #close-settings:hover {
+    background-color: #3d6591;
+  }
+  body.dark #close-settings {
+    background-color: #003d7e;
+  }
 
 /* ========== RESPONSIVE DESIGN ========== */
 @media (max-width: 600px) {

@@ -7,23 +7,36 @@
   <title>БОЖЕМИР_НМТ</title>
 </head>
 <body class="light">
+<!-- Sidebar (History Panel) -->
+<div id="container-history">
+  <div id="left-panel">
+    <div id="sidebar-settings">
+      <button id="new-chat-btn">+ Нова розмова</button>
+    </div>
+    <ul id="chat-history-list"></ul>
+  </div>
 
+  <!-- Main content (Chat App) -->
+  <div id="app-wrapper">
+    <div id="brand-header">БОЖЕМИР_НМТ</div>
+    <div id="container">
+      <div id="chat"></div>
+      <div id="input-area">
+        <input id="question" type="text" placeholder="Ваше питання" />
+        <button id="send">Відправити</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Splash Screen -->
 <div id="splash">
   <div id="splash-title"></div>
   <div id="splash-subtext">Цей бот допоможе вам підготуватись до НМТ</div>
   <button id="start-button">Розпочати</button>
 </div>
-<div id="app-wrapper">
-  <div id="brand-header">БОЖЕМИР_НМТ</div>
-  <div id="container">
-    <div id="chat"></div>
-    <div id="input-area">
-      <input id="question" type="text" placeholder="Ваше питання" />
-      <button id="send">Відправити</button>
-    </div>
-  </div>
-</div>
-<!-- Theme toggle etc -->
+
+<!-- Theme Toggle -->
 <div class="theme-switch-wrapper">
   <label class="theme-switch">
     <input type="checkbox" id="theme-toggle-checkbox" />
@@ -32,10 +45,28 @@
     </span>
   </label>
 </div>
+
+<!-- Settings Button & Modal -->
+<div class="settings-wrapper">
+  <button id="settings-button" aria-label="Open settings">⚙️</button>
+</div>
+
+<div id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <h2 id="settings-title">НАЛАШТУВАННЯ</h2>
+  <label for="typing-sound-toggle">
+    <input type="checkbox" id="typing-sound-toggle" />
+    Вимкнути звук друку
+  </label>
+  <br/>
+  <button id="close-settings">Закрити</button>
+</div>
+
+<!-- Scripts -->
+<script src="set_menu.js"></script>
+<script src="settings.js"></script>
 <script src="header.js"></script>
 <script src="theme_toggle.js"></script>
 <script src="script.js"></script>
 <script src="splash.js"></script>
 </body>
 </html>
-
