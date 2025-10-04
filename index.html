@@ -7,14 +7,6 @@
   <title>БОЖЕМИР_НМТ</title>
 </head>
 <body class="light">
-<!-- Sidebar (History Panel) -->
-<div id="container-history">
-  <div id="left-panel">
-    <div id="sidebar-settings">
-      <button id="new-chat-btn">+ Нова розмова</button>
-    </div>
-    <ul id="chat-history-list"></ul>
-  </div>
 
   <!-- Main content (Chat App) -->
   <div id="app-wrapper">
@@ -50,9 +42,11 @@
 <div class="settings-wrapper">
   <button id="settings-button" aria-label="Open settings">⚙️</button>
 </div>
-
 <div id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-  <h2 id="settings-title">НАЛАШТУВАННЯ</h2>
+  <h2 id="settings-title">МЕНЮ</h2>
+  <button id="new-chat-btn">+ Нова розмова</button>
+  <ul id="chat-history-list"></ul>
+  <bl/>
   <label for="typing-sound-toggle">
     <input type="checkbox" id="typing-sound-toggle" />
     Вимкнути звук друку

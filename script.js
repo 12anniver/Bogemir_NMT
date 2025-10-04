@@ -164,6 +164,13 @@ document.getElementById("send").addEventListener("click", async () => {
   inputEl.value = "";
   messageHistory.push({ role: "user", content: input });
 
+  // 👇 Create spinner message
+  const spinnerWrapper = document.createElement("div");
+  spinnerWrapper.className = "message bot";
+  spinnerWrapper.innerHTML = `<div class="spinner"></div>`;
+  chatEl.appendChild(spinnerWrapper);
+  chatEl.scrollTop = chatEl.scrollHeight;
+
   try {
     const response = await fetch("https://api.poe.com/v1/chat/completions", {
       method: "POST",
@@ -192,6 +199,9 @@ document.getElementById("send").addEventListener("click", async () => {
       })
       .join('\n');
 
+    // ✅ Remove spinner before showing response
+    chatEl.removeChild(spinnerWrapper);
+
     const botMsg = document.createElement("div");
     botMsg.className = "message bot";
     chatEl.appendChild(botMsg);
@@ -202,6 +212,10 @@ document.getElementById("send").addEventListener("click", async () => {
     saveCurrentChatToStorage();
   } catch (err) {
     console.error("Fetch error:", err);
+
+    // ❌ Remove spinner if there's an error
+    chatEl.removeChild(spinnerWrapper);
+
     const errorMsg = document.createElement("div");
     errorMsg.className = "message bot";
     errorMsg.style.color = "red";
@@ -209,6 +223,7 @@ document.getElementById("send").addEventListener("click", async () => {
     chatEl.appendChild(errorMsg);
   }
 });
+
 
 // Typing sound toggle checkbox
 const soundToggleCheckbox = document.getElementById('typing-sound-toggle');
