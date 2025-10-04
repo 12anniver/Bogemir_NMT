@@ -5,6 +5,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="style.css">
   <title>БОЖЕМИР_НМТ</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set, serverTimestamp, onDisconnect } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAuXCSl7BEcTz_fWF0Blb-h6VYyxTflmyM",
+      authDomain: "bogemir-nmt.firebaseapp.com",
+      projectId: "bogemir-nmt",
+      storageBucket: "bogemir-nmt.firebasestorage.app",
+      messagingSenderId: "623930043833",
+      appId: "1:623930043833:web:8b4a89597327eee4ac1a68",
+      measurementId: "G-T0PVNYX3MT"
+    };
+
+    // Initialize Firebase app and DB with explicit database URL
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app, "https://bogemir-nmt-default-rtdb.europe-west1.firebasedatabase.app");
+
+    // Unique ID for this visitor/session
+    const userId = Math.random().toString(36).slice(2, 10);
+    const userRef = ref(db, 'onlineUsers/' + userId);
+
+    function setUserOnline() {
+      set(userRef, { lastOnline: serverTimestamp() })
+        .catch(err => console.error("Failed to set user online:", err));
+    }
+
+    // Remove this user from onlineUsers on disconnect
+    onDisconnect(userRef).remove();
+
+    // Initial presence set
+    setUserOnline();
+
+    // Update heartbeat every 10 seconds
+    setInterval(setUserOnline, 10000);
+
+    // Listen for all online users
+    const onlineUsersRef = ref(db, 'onlineUsers');
+
+    let lastCount = 0;
+
+onValue(onlineUsersRef, snapshot => {
+  const users = snapshot.val() || {};
+  const now = Date.now();
+  let count = 0;
+
+  for (const id in users) {
+    if (users[id].lastOnline && (now - users[id].lastOnline) < 15000) {
+      count++;
+    }
+  }
+
+  const onlineCounter = document.getElementById('onlineCount');
+  onlineCounter.textContent = count;
+
+  const counterWrapper = document.getElementById('online-users-counter');
+
+  if (count > lastCount) {
+    // New user joined - bounce animation
+    counterWrapper.classList.remove('animated-shake');
+    counterWrapper.classList.add('animated-bounce');
+
+    // Remove the animation class after animation ends
+    setTimeout(() => {
+      counterWrapper.classList.remove('animated-bounce');
+    }, 600);
+  } else if (count < lastCount) {
+    // User left - shake animation
+    counterWrapper.classList.remove('animated-bounce');
+    counterWrapper.classList.add('animated-shake');
+
+    setTimeout(() => {
+      counterWrapper.classList.remove('animated-shake');
+    }, 600);
+  }
+
+  lastCount = count;
+});
+
+
+      for (const id in users) {
+        if (users[id].lastOnline && (now - users[id].lastOnline) < 15000) {
+          count++;
+        }
+      }
+
+      document.getElementById('onlineCount').textContent = count;
+  </script>
 </head>
 <body class="light">
 
@@ -28,6 +116,7 @@
   <button id="start-button">Розпочати</button>
 </div>
 
+
 <!-- Theme Toggle -->
 <div class="theme-switch-wrapper">
   <label class="theme-switch">
@@ -39,9 +128,13 @@
 </div>
 
 <!-- Settings Button & Modal -->
-<div class="settings-wrapper">
+<div class="settings-wrapper" style="display: flex; align-items: center; gap: 10px;">
+  <div id="online-users-counter" aria-live="polite" aria-atomic="true" role="status" style="font-weight: bold;">
+    👥<span id="onlineCount">0</span>
+  </div>
   <button id="settings-button" aria-label="Open settings">⚙️</button>
 </div>
+
 <div id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
   <h2 id="settings-title">МЕНЮ</h2>
   <button id="new-chat-btn">+ Нова розмова</button>

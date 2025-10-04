@@ -224,6 +224,13 @@ document.getElementById("send").addEventListener("click", async () => {
   }
 });
 
+// Send message on Enter key (without Shift)
+document.getElementById('question').addEventListener('keydown', function(event) {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();  // Prevent newline
+    document.getElementById('send').click();  // Trigger send button
+  }
+});
 
 // Typing sound toggle checkbox
 const soundToggleCheckbox = document.getElementById('typing-sound-toggle');
