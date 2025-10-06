@@ -4,7 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="about_us.css">
   <title>БОЖЕМИР_НМТ</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- Firebase & Online User Tracker -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getDatabase, ref, onValue, set, serverTimestamp, onDisconnect } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
@@ -19,11 +23,9 @@
       measurementId: "G-T0PVNYX3MT"
     };
 
-    // Initialize Firebase app and DB with explicit database URL
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app, "https://bogemir-nmt-default-rtdb.europe-west1.firebasedatabase.app");
 
-    // Unique ID for this visitor/session
     const userId = Math.random().toString(36).slice(2, 10);
     const userRef = ref(db, 'onlineUsers/' + userId);
 
@@ -32,58 +34,17 @@
         .catch(err => console.error("Failed to set user online:", err));
     }
 
-    // Remove this user from onlineUsers on disconnect
     onDisconnect(userRef).remove();
-
-    // Initial presence set
     setUserOnline();
-
-    // Update heartbeat every 10 seconds
     setInterval(setUserOnline, 10000);
 
-    // Listen for all online users
     const onlineUsersRef = ref(db, 'onlineUsers');
-
     let lastCount = 0;
 
-onValue(onlineUsersRef, snapshot => {
-  const users = snapshot.val() || {};
-  const now = Date.now();
-  let count = 0;
-
-  for (const id in users) {
-    if (users[id].lastOnline && (now - users[id].lastOnline) < 15000) {
-      count++;
-    }
-  }
-
-  const onlineCounter = document.getElementById('onlineCount');
-  onlineCounter.textContent = count;
-
-  const counterWrapper = document.getElementById('online-users-counter');
-
-  if (count > lastCount) {
-    // New user joined - bounce animation
-    counterWrapper.classList.remove('animated-shake');
-    counterWrapper.classList.add('animated-bounce');
-
-    // Remove the animation class after animation ends
-    setTimeout(() => {
-      counterWrapper.classList.remove('animated-bounce');
-    }, 600);
-  } else if (count < lastCount) {
-    // User left - shake animation
-    counterWrapper.classList.remove('animated-bounce');
-    counterWrapper.classList.add('animated-shake');
-
-    setTimeout(() => {
-      counterWrapper.classList.remove('animated-shake');
-    }, 600);
-  }
-
-  lastCount = count;
-});
-
+    onValue(onlineUsersRef, snapshot => {
+      const users = snapshot.val() || {};
+      const now = Date.now();
+      let count = 0;
 
       for (const id in users) {
         if (users[id].lastOnline && (now - users[id].lastOnline) < 15000) {
@@ -91,69 +52,113 @@ onValue(onlineUsersRef, snapshot => {
         }
       }
 
-      document.getElementById('onlineCount').textContent = count;
+      const onlineCounter = document.getElementById('onlineCount');
+      if (onlineCounter) {
+        onlineCounter.textContent = count;
+      }
+
+      const counterWrapper = document.getElementById('online-users-counter');
+      if (counterWrapper) {
+        if (count > lastCount) {
+          counterWrapper.classList.remove('animated-shake');
+          counterWrapper.classList.add('animated-bounce');
+          setTimeout(() => counterWrapper.classList.remove('animated-bounce'), 600);
+        } else if (count < lastCount) {
+          counterWrapper.classList.remove('animated-bounce');
+          counterWrapper.classList.add('animated-shake');
+          setTimeout(() => counterWrapper.classList.remove('animated-shake'), 600);
+        }
+      }
+
+      lastCount = count;
+    });
   </script>
 </head>
+
 <body class="light">
 
-  <!-- Main content (Chat App) -->
+  <!-- Main content -->
   <div id="app-wrapper">
     <div id="brand-header">БОЖЕМИР_НМТ</div>
     <div id="container">
       <div id="chat"></div>
+
+      <div id="typing-indicator" class="typing-indicator" style="display: none;">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+
       <div id="input-area">
         <input id="question" type="text" placeholder="Ваше питання" />
         <button id="send">Відправити</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Splash Screen -->
-<div id="splash">
-  <div id="splash-title"></div>
-  <div id="splash-subtext">Цей бот допоможе вам підготуватись до НМТ</div>
-  <button id="start-button">Розпочати</button>
-</div>
-
-
-<!-- Theme Toggle -->
-<div class="theme-switch-wrapper">
-  <label class="theme-switch">
-    <input type="checkbox" id="theme-toggle-checkbox" />
-    <span class="slider">
-      <span class="icon">☀️</span>
-    </span>
-  </label>
-</div>
-
-<!-- Settings Button & Modal -->
-<div class="settings-wrapper" style="display: flex; align-items: center; gap: 10px;">
-  <div id="online-users-counter" aria-live="polite" aria-atomic="true" role="status" style="font-weight: bold;">
-    👥<span id="onlineCount">0</span>
+  <!-- Splash Screen -->
+  <div id="splash">
+    <div id="splash-title"></div>
+    <div id="splash-subtext">Цей бот допоможе вам підготуватись до НМТ</div>
+    <button id="start-button">Розпочати</button>
   </div>
-  <button id="settings-button" aria-label="Open settings">⚙️</button>
-</div>
 
-<div id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-  <h2 id="settings-title">МЕНЮ</h2>
-  <button id="new-chat-btn">+ Нова розмова</button>
-  <ul id="chat-history-list"></ul>
-  <bl/>
-  <label for="typing-sound-toggle">
-    <input type="checkbox" id="typing-sound-toggle" />
-    Вимкнути звук друку
-  </label>
-  <br/>
-  <button id="close-settings">Закрити</button>
-</div>
+  <!-- Theme Toggle -->
+  <div class="theme-switch-wrapper">
+    <label class="theme-switch">
+      <input type="checkbox" id="theme-toggle-checkbox" />
+      <span class="slider">
+        <span class="icon">☀️</span>
+      </span>
+    </label>
+  </div>
 
-<!-- Scripts -->
-<script src="set_menu.js"></script>
-<script src="settings.js"></script>
-<script src="header.js"></script>
-<script src="theme_toggle.js"></script>
-<script src="script.js"></script>
-<script src="splash.js"></script>
+  <!-- Settings & Online Counter -->
+  <div class="settings-wrapper" style="display: flex; align-items: center; gap: 10px;">
+    <div id="online-users-counter" aria-live="polite" aria-atomic="true" role="status" style="font-weight: bold;">
+      👥<span id="onlineCount">0</span>
+    </div>
+    <button id="settings-button" aria-label="Open settings">⚙️</button>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <h2 id="settings-title">МЕНЮ</h2>
+    <button id="new-chat-btn">+ Нова розмова</button>
+    <ul id="chat-history-list"></ul>
+    <br />
+    <label for="typing-sound-toggle">
+      <input type="checkbox" id="typing-sound-toggle" />
+      Вимкнути звук друку
+    </label>
+    <br />
+    <button id="close-settings">Закрити</button>
+  </div>
+  <!-- Floating Help Button -->
+  <button id="help-button" aria-label="About Us" title="About Us" class="help-button">?</button>
+
+  <!-- About Us Modal -->
+  <div id="about-modal" class="modal-us hidden" role="dialog" aria-modal="true" aria-labelledby="about-title" aria-describedby="about-desc">
+    <div class="modal-content">
+      <h2 id="about-title">Про нас</h2>
+      <p id="about-desc">
+        Цей бот створено командою БОЖЕМИР_НМТ для допомоги у підготовці до Національного мультипредметного тесту.
+        Ми прагнемо зробити навчання простим і доступним для кожного.
+      </p>
+      <button id="about-close" aria-label="Close About Us">Закрити</button>
+    </div>
+  </div>
+
+  <!-- External Scripts -->
+  <script src="about_us.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+  <script src="mat_log.js"></script>
+  <script src="set_menu.js"></script>
+  <script src="settings.js"></script>
+  <script src="header.js"></script>
+  <script src="theme_toggle.js"></script>
+  <script src="script.js"></script>
+  <script src="splash.js"></script>
+
 </body>
 </html>

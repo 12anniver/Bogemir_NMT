@@ -10,9 +10,10 @@ const messageHistory = [];
 let allChats = JSON.parse(localStorage.getItem("savedChats") || "[]");
 let currentChatId = null;
 
-// Typing animation
-async function typeText(element, text, speed = 12, playSound = true) {
-  element.innerHTML = '';
+// Typing animation with optional disableTypingAnimation flag
+async function typeText(element, rawText, speed = 12, playSound = true) {
+  // Animate plain characters first (no HTML yet)
+  element.textContent = "";
 
   if (playSound && !isMuted) {
     try {
@@ -22,9 +23,9 @@ async function typeText(element, text, speed = 12, playSound = true) {
     }
   }
 
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    element.innerHTML += char === '\n' ? '<br>' : char;
+  for (let i = 0; i < rawText.length; i++) {
+    const char = rawText[i];
+    element.textContent += char;
     await new Promise(resolve => setTimeout(resolve, speed));
   }
 
@@ -32,7 +33,22 @@ async function typeText(element, text, speed = 12, playSound = true) {
     typingSound.pause();
     typingSound.currentTime = 0;
   }
+
+  // After animation ends, parse Markdown into HTML
+  const parsed = marked.parseInline(rawText);
+  element.innerHTML = parsed;
+
+  // Now render math if present
+  if (window.MathJax) {
+    try {
+      await MathJax.typesetPromise([element]);
+    } catch (err) {
+      console.error("MathJax error:", err);
+    }
+  }
 }
+
+
 
 // Save current chat
 function saveCurrentChatToStorage() {
@@ -95,7 +111,6 @@ function renderChatHistorySidebar() {
       });
     });
 
-
     // 🗑 Delete button
     const delBtn = document.createElement("button");
     delBtn.className = "delete-btn";
@@ -115,7 +130,7 @@ function renderChatHistorySidebar() {
     li.addEventListener("mouseenter", () => {
       hoverTimer = setTimeout(() => {
         delBtn.style.display = "inline-block";
-      }, 500);
+      }, 350);
     });
 
     li.addEventListener("mouseleave", () => {
@@ -130,22 +145,31 @@ function renderChatHistorySidebar() {
 }
 
 // Load chat by ID
-function loadChat(chatId) {
+async function loadChat(chatId) {
   const chatEl = document.getElementById("chat");
   chatEl.innerHTML = "";
   const messages = JSON.parse(localStorage.getItem(chatId) || "[]");
   messageHistory.length = 0;
 
-  messages.forEach(msg => {
+  for (const msg of messages) {
     const msgDiv = document.createElement("div");
     msgDiv.className = "message " + (msg.role === "user" ? "user" : "bot");
     msgDiv.innerHTML = msg.content.replace(/\n/g, "<br>");
     chatEl.appendChild(msgDiv);
     messageHistory.push(msg);
-  });
+  }
 
   chatEl.scrollTop = chatEl.scrollHeight;
   currentChatId = chatId;
+
+  // Render math expressions with MathJax
+  if (window.MathJax) {
+    try {
+      await MathJax.typesetPromise([chatEl]);
+    } catch (err) {
+      console.error("MathJax typeset error:", err);
+    }
+  }
 }
 
 // Handle message send
@@ -164,12 +188,10 @@ document.getElementById("send").addEventListener("click", async () => {
   inputEl.value = "";
   messageHistory.push({ role: "user", content: input });
 
-  // 👇 Create spinner message
-  const spinnerWrapper = document.createElement("div");
-  spinnerWrapper.className = "message bot";
-  spinnerWrapper.innerHTML = `<div class="spinner"></div>`;
-  chatEl.appendChild(spinnerWrapper);
-  chatEl.scrollTop = chatEl.scrollHeight;
+  // 👇 Show spinner
+  const typingIndicator = document.getElementById("typing-indicator");
+  typingIndicator.style.display = "flex";
+
 
   try {
     const response = await fetch("https://api.poe.com/v1/chat/completions", {
@@ -199,36 +221,44 @@ document.getElementById("send").addEventListener("click", async () => {
       })
       .join('\n');
 
-    // ✅ Remove spinner before showing response
-    chatEl.removeChild(spinnerWrapper);
-
     const botMsg = document.createElement("div");
     botMsg.className = "message bot";
     chatEl.appendChild(botMsg);
-    await typeText(botMsg, filtered, 25);
+
+    // Detect if the bot message contains math delimiters
+    const hasMath = /\$.*?\$/.test(filtered);
+
+    await typeText(botMsg, filtered, 25, true, hasMath);
+
+    if (window.MathJax) {
+      try {
+        await MathJax.typesetPromise([botMsg]);
+      } catch (err) {
+        console.error("MathJax typeset error:", err);
+      }
+    }
 
     chatEl.scrollTop = chatEl.scrollHeight;
     messageHistory.push({ role: "assistant", content: filtered });
     saveCurrentChatToStorage();
   } catch (err) {
     console.error("Fetch error:", err);
-
-    // ❌ Remove spinner if there's an error
-    chatEl.removeChild(spinnerWrapper);
-
     const errorMsg = document.createElement("div");
     errorMsg.className = "message bot";
     errorMsg.style.color = "red";
     errorMsg.textContent = "Error: " + err.message;
     chatEl.appendChild(errorMsg);
+  } finally {
+    // 👇 Hide spinner after response
+    typingIndicator.style.display = "none";
   }
 });
 
-// Send message on Enter key (without Shift)
-document.getElementById('question').addEventListener('keydown', function(event) {
-  if (event.key === 'Enter' && !event.shiftKey) {
-    event.preventDefault();  // Prevent newline
-    document.getElementById('send').click();  // Trigger send button
+// Prevent new line on Enter + Shift+Enter for new line
+document.getElementById("question").addEventListener("keydown", async (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();  // Prevent new line on Enter
+    document.getElementById("send").click();  // Trigger send button click
   }
 });
 
