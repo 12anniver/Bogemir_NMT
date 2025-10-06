@@ -74,7 +74,9 @@
   text-align: center;
   /* No scale transform here */
 }
-
+body.dark .modal-content{
+  background: rgb(47, 49, 62);
+}
 
 /* Button style stays same */
 #about-close {
