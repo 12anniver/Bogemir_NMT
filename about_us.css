@@ -34,10 +34,9 @@
 .help-button:focus {
   background-color: #0056b3;
   outline: none;
-  animation-play-state: paused; /* pause pulse on hover/focus */
+  animation-play-state: paused; 
 }
 
-/* Modal animation styles */
 
 .modal-us {
   position: fixed;
@@ -49,14 +48,14 @@
   z-index: 1000;
 
   opacity: 0;
-  transform: scale(0.95); /* slightly scaled down initially */
+  transform: scale(0.95); 
   pointer-events: none;
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .modal-us.show {
   opacity: 1;
-  transform: scale(1); /* full size when shown */
+  transform: scale(1); 
   pointer-events: auto;
 }
 
@@ -72,13 +71,13 @@
   width: 90%;
   box-shadow: 0 8px 16px rgba(0,0,0,0.3);
   text-align: center;
-  /* No scale transform here */
+ 
 }
 body.dark .modal-content{
   background: rgb(47, 49, 62);
 }
 
-/* Button style stays same */
+
 #about-close {
   margin-top: 20px;
   padding: 8px 16px;
